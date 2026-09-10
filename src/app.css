@@ -1,0 +1,56 @@
+@import '@fontsource/archivo/400.css';
+@import '@fontsource/archivo/600.css';
+@import '@fontsource/barlow-semi-condensed/400.css';
+
+:root {
+  /* Tema Escuro (prompt.md §9) — único tema implementado na Fatia 1 */
+  --fundo: #16181c;
+  --superficie: #1e2126;
+  --superficie-alta: #272b31;
+  --texto: #eceef1;
+  --texto-fraco: #9aa1ab;
+  --borda: #333840;
+  --acento: #e0a458;
+  --sucesso: #5fb48a;
+
+  --fonte-interface: 'Archivo', system-ui, sans-serif;
+  --fonte-letra: 'Barlow Semi Condensed', system-ui, sans-serif;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte-interface);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+#app {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
