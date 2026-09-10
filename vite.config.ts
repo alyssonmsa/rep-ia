@@ -4,6 +4,11 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Relativo de propósito: GitLab/GitHub Pages de projeto servem o site num
+  // subcaminho (ex.: usuario.gitlab.io/rep-ia/), não na raiz do domínio.
+  // Com base relativa o build funciona em qualquer subcaminho sem precisar
+  // saber o nome do projeto de antemão.
+  base: './',
   plugins: [
     svelte(),
     VitePWA({
@@ -15,7 +20,8 @@ export default defineConfig({
         description:
           'Transforma qualquer celular ou tablet em painel de palco legível e controlável sem as mãos, funcionando offline.',
         lang: 'pt-BR',
-        start_url: '/',
+        start_url: '.',
+        scope: '.',
         display: 'standalone',
         background_color: '#16181c',
         theme_color: '#16181c',
