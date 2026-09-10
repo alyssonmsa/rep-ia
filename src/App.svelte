@@ -8,12 +8,15 @@
   import SetlistsScreen from './lib/setlist/SetlistsScreen.svelte'
   import SetlistDetail from './lib/setlist/SetlistDetail.svelte'
   import StageMode from './lib/stage/StageMode.svelte'
+  import Onboarding from './lib/onboarding/Onboarding.svelte'
   import { musicasStore } from './lib/data/musicasStore.svelte'
   import { setlistsStore } from './lib/data/setlistsStore.svelte'
   import { lotesStore } from './lib/data/lotesStore.svelte'
+  import { preferenciasStore } from './lib/data/preferenciasStore.svelte'
   import { iniciarImportacao } from './lib/import/iniciarImportacao'
   import { gerarJsonBackup, gerarTxtCanonico } from './lib/parser/exportar'
   import { baixarArquivo } from './lib/download'
+  import { semearRepertorioExemplo } from './lib/onboarding/repertorioExemplo'
   import type { BlocoParseado } from './lib/parser/parseBlock'
 
   type Tela =
@@ -37,6 +40,50 @@
   let ultimaVinculacao = $state<number | null>(null)
   let timeoutVinculacao: ReturnType<typeof setTimeout> | undefined
 
+  // Onboarding (prompt.md §10, Fatia 5): tela cheia uma única vez, antes
+  // de qualquer outra coisa.
+  const CHAVE_ONBOARDING = 'prompter:onboarding-visto'
+
+  function lerOnboardingVisto(): boolean {
+    try {
+      return localStorage.getItem(CHAVE_ONBOARDING) === '1'
+    } catch {
+      return false
+    }
+  }
+
+  let onboardingVisto = $state(lerOnboardingVisto())
+
+  function marcarOnboardingVisto() {
+    onboardingVisto = true
+    try {
+      localStorage.setItem(CHAVE_ONBOARDING, '1')
+    } catch {
+      // sem persistência — só reaparece no próximo load, tudo bem.
+    }
+  }
+
+  function onboardingColarLetra() {
+    marcarOnboardingVisto()
+    tela = { nome: 'colar' }
+  }
+
+  function onboardingArquivoTexto(texto: string) {
+    marcarOnboardingVisto()
+    handleArquivoTexto(texto)
+  }
+
+  async function onboardingRepertorioExemplo() {
+    marcarOnboardingVisto()
+    const setlistId = await semearRepertorioExemplo()
+    tela = { nome: 'setlist-detail', setlistId }
+  }
+
+  function onboardingPular() {
+    marcarOnboardingVisto()
+    tela = { nome: 'acervo' }
+  }
+
   // Vinculação tardia (prompt.md §8.4) depois de qualquer importação bem-sucedida.
   async function avisarVinculacaoTardia() {
     const quantidade = await setlistsStore.tentarVincularTodas(musicasStore.list)
@@ -52,6 +99,7 @@
     void musicasStore.load()
     void setlistsStore.load()
     void lotesStore.load()
+    void preferenciasStore.load()
   })
 
   function irParaResultado(resultado: ReturnType<typeof iniciarImportacao>, origemLegado: 'colar' | 'arquivo') {
@@ -108,7 +156,14 @@
   }
 </script>
 
-{#if tela.nome === 'palco'}
+{#if !onboardingVisto}
+  <Onboarding
+    onColarLetra={onboardingColarLetra}
+    onArquivoTexto={onboardingArquivoTexto}
+    onRepertorioExemplo={onboardingRepertorioExemplo}
+    onPular={onboardingPular}
+  />
+{:else if tela.nome === 'palco'}
   {@const setlistIdAtual = tela.setlistId}
   <StageMode setlistId={setlistIdAtual} onExit={() => (tela = { nome: 'setlist-detail', setlistId: setlistIdAtual })} />
 {:else}

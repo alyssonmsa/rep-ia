@@ -7,12 +7,24 @@
     onAumentarFonte,
     onDiminuirFonte,
     onFechar,
+    modoAutoscroll,
+    onAlternarAutoscroll,
+    velocidadeIndex,
+    velocidadeMaxIndex,
+    onAumentarVelocidade,
+    onDiminuirVelocidade,
   }: {
     fontIndex: number
     fontMaxIndex: number
     onAumentarFonte: () => void
     onDiminuirFonte: () => void
     onFechar: () => void
+    modoAutoscroll: boolean
+    onAlternarAutoscroll: () => void
+    velocidadeIndex: number
+    velocidadeMaxIndex: number
+    onAumentarVelocidade: () => void
+    onDiminuirVelocidade: () => void
   } = $props()
 
   const TEMAS: { valor: Tema; rotulo: string }[] = [
@@ -49,6 +61,36 @@
       {/each}
     </div>
   </div>
+
+  <div class="painel__secao">
+    <span class="painel__rotulo">Navegação</span>
+    <div class="painel__botoes">
+      <button class:painel__tema--ativo={!modoAutoscroll} onclick={() => modoAutoscroll && onAlternarAutoscroll()}>
+        Estrofe
+      </button>
+      <button class:painel__tema--ativo={modoAutoscroll} onclick={() => !modoAutoscroll && onAlternarAutoscroll()}>
+        Autoscroll
+      </button>
+    </div>
+  </div>
+
+  {#if modoAutoscroll}
+    <div class="painel__secao">
+      <span class="painel__rotulo">Velocidade</span>
+      <div class="painel__botoes">
+        <button onclick={onDiminuirVelocidade} disabled={velocidadeIndex <= 0} aria-label="Diminuir velocidade">
+          −
+        </button>
+        <button
+          onclick={onAumentarVelocidade}
+          disabled={velocidadeIndex >= velocidadeMaxIndex}
+          aria-label="Aumentar velocidade"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
