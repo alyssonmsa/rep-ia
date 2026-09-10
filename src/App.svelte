@@ -16,7 +16,7 @@
   import { iniciarImportacao } from './lib/import/iniciarImportacao'
   import { gerarJsonBackup, gerarTxtCanonico } from './lib/parser/exportar'
   import { baixarArquivo } from './lib/download'
-  import { semearRepertorioExemplo } from './lib/onboarding/repertorioExemplo'
+  import { semearRepertorioReal } from './lib/onboarding/repertorioReal'
   import type { BlocoParseado } from './lib/parser/parseBlock'
 
   type Tela =
@@ -73,12 +73,6 @@
     handleArquivoTexto(texto)
   }
 
-  async function onboardingRepertorioExemplo() {
-    marcarOnboardingVisto()
-    const setlistId = await semearRepertorioExemplo()
-    tela = { nome: 'setlist-detail', setlistId }
-  }
-
   function onboardingPular() {
     marcarOnboardingVisto()
     tela = { nome: 'acervo' }
@@ -96,10 +90,19 @@
   }
 
   onMount(() => {
-    void musicasStore.load()
-    void setlistsStore.load()
-    void lotesStore.load()
-    void preferenciasStore.load()
+    void (async () => {
+      await musicasStore.load()
+      await setlistsStore.load()
+      await lotesStore.load()
+      await preferenciasStore.load()
+
+      // Semeia o repertório real uma única vez, só quando o acervo está
+      // genuinamente vazio (primeiro acesso, ou storage limpo) — nunca
+      // duplica numa visita subsequente.
+      if (musicasStore.list.length === 0) {
+        await semearRepertorioReal()
+      }
+    })()
   })
 
   function irParaResultado(resultado: ReturnType<typeof iniciarImportacao>, origemLegado: 'colar' | 'arquivo') {
@@ -160,7 +163,6 @@
   <Onboarding
     onColarLetra={onboardingColarLetra}
     onArquivoTexto={onboardingArquivoTexto}
-    onRepertorioExemplo={onboardingRepertorioExemplo}
     onPular={onboardingPular}
   />
 {:else if tela.nome === 'palco'}

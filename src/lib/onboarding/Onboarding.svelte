@@ -5,12 +5,10 @@
   let {
     onColarLetra,
     onArquivoTexto,
-    onRepertorioExemplo,
     onPular,
   }: {
     onColarLetra: () => void
     onArquivoTexto: (texto: string) => void
-    onRepertorioExemplo: () => void
     onPular: () => void
   } = $props()
 
@@ -73,10 +71,9 @@
 
     <div class="onboarding__rodape">
       <button class="onboarding__cta onboarding__cta--principal" onclick={onColarLetra}>
-        Colar minha primeira letra
+        Colar uma letra
       </button>
       <button class="onboarding__cta" onclick={() => inputArquivo?.click()}>Importar um arquivo</button>
-      <button class="onboarding__cta" onclick={onRepertorioExemplo}>Ver repertório de exemplo</button>
       <input
         bind:this={inputArquivo}
         type="file"
