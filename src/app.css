@@ -1,9 +1,11 @@
 @import '@fontsource/archivo/400.css';
 @import '@fontsource/archivo/600.css';
 @import '@fontsource/barlow-semi-condensed/400.css';
+@import '@fontsource/ibm-plex-mono/400.css';
 
-:root {
-  /* Tema Escuro (prompt.md §9) — único tema implementado na Fatia 1 */
+:root,
+:root[data-tema='escuro'] {
+  /* Tema Escuro (prompt.md §9) — padrão, uso geral e ensaio */
   --fundo: #16181c;
   --superficie: #1e2126;
   --superficie-alta: #272b31;
@@ -13,10 +15,44 @@
   --acento: #e0a458;
   --sucesso: #5fb48a;
 
-  --fonte-interface: 'Archivo', system-ui, sans-serif;
-  --fonte-letra: 'Barlow Semi Condensed', system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+:root[data-tema='claro'] {
+  /* Claro — luz do dia, montagem de repertório, ensaio de tarde */
+  --fundo: #faf9f7;
+  --superficie: #ffffff;
+  --superficie-alta: #f1efec;
+  --texto: #1a1c20;
+  --texto-fraco: #5c636d;
+  --borda: #e2e1dd;
+  --acento: #b07430;
+  --sucesso: #2f7d5c;
+
+  color-scheme: light;
+}
+
+:root[data-tema='classico'] {
+  /* Teleprompter clássico — preto/branco puros, sem hierarquia além do
+     brilho do texto: nenhuma outra regra de estilo no app deve depender
+     de --superficie/--superficie-alta/--borda serem visualmente distintos
+     do fundo, porque aqui eles não são de propósito. */
+  --fundo: #000000;
+  --superficie: #000000;
+  --superficie-alta: #000000;
+  --texto: #ffffff;
+  --texto-fraco: #8c8c8c;
+  --borda: transparent;
+  --acento: #e0a458;
+  --sucesso: #8c8c8c;
 
   color-scheme: dark;
+}
+
+:root {
+  --fonte-interface: 'Archivo', system-ui, sans-serif;
+  --fonte-letra: 'Barlow Semi Condensed', system-ui, sans-serif;
+  --fonte-cifra: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 * {

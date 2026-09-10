@@ -34,6 +34,20 @@
   let ultimaImportacao = $state<{ loteId: string; quantidade: number } | null>(null)
   let timeoutImportacao: ReturnType<typeof setTimeout> | undefined
 
+  let ultimaVinculacao = $state<number | null>(null)
+  let timeoutVinculacao: ReturnType<typeof setTimeout> | undefined
+
+  // Vinculação tardia (prompt.md §8.4) depois de qualquer importação bem-sucedida.
+  async function avisarVinculacaoTardia() {
+    const quantidade = await setlistsStore.tentarVincularTodas(musicasStore.list)
+    if (quantidade === 0) return
+    ultimaVinculacao = quantidade
+    clearTimeout(timeoutVinculacao)
+    timeoutVinculacao = setTimeout(() => {
+      ultimaVinculacao = null
+    }, 8000)
+  }
+
   onMount(() => {
     void musicasStore.load()
     void setlistsStore.load()
@@ -59,6 +73,7 @@
 
   function notificarImportacao(loteId: string, quantidade: number) {
     tela = { nome: 'acervo' }
+    void avisarVinculacaoTardia()
     if (quantidade === 0) return
     ultimaImportacao = { loteId, quantidade }
     clearTimeout(timeoutImportacao)
@@ -106,6 +121,13 @@
         <button onclick={desfazerImportacao}>Desfazer</button>
       </div>
     {/if}
+    {#if ultimaVinculacao}
+      <div class="shell__aviso" role="status">
+        <span>
+          {ultimaVinculacao} item{ultimaVinculacao === 1 ? '' : 's'} da{ultimaVinculacao === 1 ? '' : 's'} suas setlists agora {ultimaVinculacao === 1 ? 'tem' : 'têm'} letra disponível
+        </span>
+      </div>
+    {/if}
 
     <nav class="shell__tabs">
       <button class:shell__tab--ativa={aba === 'acervo'} class="shell__tab" onclick={() => (tela = { nome: 'acervo' })}>
@@ -129,7 +151,7 @@
       {:else if tela.nome === 'colar'}
         <ColarLetra
           onCancelar={() => (tela = { nome: 'acervo' })}
-          onSalvo={() => (tela = { nome: 'acervo' })}
+          onSalvo={() => { tela = { nome: 'acervo' }; void avisarVinculacaoTardia() }}
           onRevisao={(blocos) => (tela = { nome: 'revisao', blocos })}
           onLegado={(textoOriginal) => (tela = { nome: 'legado', textoOriginal, origem: 'colar' })}
         />

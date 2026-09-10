@@ -2,6 +2,7 @@
   import { onDestroy, onMount } from 'svelte'
   import QueueView from './QueueView.svelte'
   import LyricsView from './LyricsView.svelte'
+  import QuickSearch from './QuickSearch.svelte'
   import { musicasStore } from '../data/musicasStore.svelte'
   import { setlistsStore } from '../data/setlistsStore.svelte'
   import { createWakeLockController } from '../wakelock'
@@ -33,6 +34,16 @@
   function voltarParaFila() {
     view = 'fila'
     musicaAberta = null
+  }
+
+  // Busca rápida (prompt.md §8.5): abre a letra direto, sem passar pela
+  // fila — a música achada nem precisa estar nesta setlist.
+  let buscaAberta = $state(false)
+
+  function abrirResultadoBusca(musica: Musica) {
+    musicaAberta = musica
+    view = 'letra'
+    buscaAberta = false
   }
 
   const wakeLock = createWakeLockController()
@@ -74,9 +85,22 @@
 
   <div class="stage__body">
     {#if view === 'fila'}
-      <QueueView {itens} {currentItemId} {resolveMusica} onSelect={selecionarItem} {onExit} />
+      <QueueView
+        {itens}
+        {currentItemId}
+        {resolveMusica}
+        onSelect={selecionarItem}
+        {onExit}
+        onAbrirBusca={() => (buscaAberta = true)}
+      />
     {:else if musicaAberta}
-      <LyricsView musica={musicaAberta} onBack={voltarParaFila} />
+      {#key musicaAberta.id}
+        <LyricsView musica={musicaAberta} onBack={voltarParaFila} onAbrirBusca={() => (buscaAberta = true)} />
+      {/key}
+    {/if}
+
+    {#if buscaAberta}
+      <QuickSearch onSelecionar={abrirResultadoBusca} onFechar={() => (buscaAberta = false)} />
     {/if}
   </div>
 </div>
@@ -91,6 +115,7 @@
   .stage__body {
     flex: 1;
     min-height: 0;
+    position: relative;
   }
 
   .stage__warning {

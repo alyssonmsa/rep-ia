@@ -2,6 +2,7 @@
   import { musicasStore } from '../data/musicasStore.svelte'
   import { lotesStore } from '../data/lotesStore.svelte'
   import { planejarImportacao, type PoliticaDuplicata } from '../import/duplicatas'
+  import { detectarCifra } from '../cifra/detectarCifra'
   import type { BlocoParseado } from '../parser/parseBlock'
 
   let {
@@ -40,7 +41,13 @@
       idsCriados.push(musica.id)
     }
     for (const { musicaId, bloco } of plano.substituir) {
-      await musicasStore.update(musicaId, { titulo: bloco.titulo, letra: bloco.letra })
+      // Reimportação redeteca cifrada (prompt.md §6: o flag corrigido
+      // manualmente se perde no round-trip do .txt de propósito).
+      await musicasStore.update(musicaId, {
+        titulo: bloco.titulo,
+        letra: bloco.letra,
+        cifrada: detectarCifra(bloco.letra),
+      })
     }
 
     confirmando = false

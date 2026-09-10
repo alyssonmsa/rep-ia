@@ -7,12 +7,14 @@
     resolveMusica,
     onSelect,
     onExit,
+    onAbrirBusca,
   }: {
     itens: ItemSetlist[]
     currentItemId: string | null
     resolveMusica: (musicaId: string) => Musica | undefined
     onSelect: (itemId: string) => void
     onExit: () => void
+    onAbrirBusca: () => void
   } = $props()
 
   function temLetra(item: ItemSetlist): boolean {
@@ -24,6 +26,7 @@
   <div class="queue__header">
     <button class="queue__sair" onclick={onExit}>‹ Sair</button>
     <h1 class="queue__title">Repertório</h1>
+    <button class="queue__buscar" onclick={onAbrirBusca}>Buscar</button>
   </div>
 
   {#if itens.length === 0}
@@ -78,10 +81,21 @@
   }
 
   .queue__title {
+    flex: 1;
     font-size: 20px;
     font-weight: 600;
     color: var(--texto-fraco);
     margin: 0;
+  }
+
+  .queue__buscar {
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    color: var(--acento);
+    font-size: 14px;
+    min-height: 32px;
+    padding: 0 4px;
   }
 
   .queue__vazio {

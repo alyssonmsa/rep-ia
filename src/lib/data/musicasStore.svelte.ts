@@ -1,4 +1,5 @@
 import { getDb } from './db'
+import { detectarCifra } from '../cifra/detectarCifra'
 import type { Musica } from '../../types'
 
 let musicas = $state<Musica[]>([])
@@ -11,13 +12,15 @@ async function load() {
   loaded = true
 }
 
+// cifrada é sempre derivada aqui — toda criação é, por definição, uma
+// "importação" nova (prompt.md §7), nunca perguntada ao usuário.
 async function create(input: { titulo: string; letra: string }): Promise<Musica> {
   const agora = Date.now()
   const musica: Musica = {
     id: crypto.randomUUID(),
     titulo: input.titulo,
     letra: input.letra,
-    cifrada: false,
+    cifrada: detectarCifra(input.letra),
     criadoEm: agora,
     atualizadoEm: agora,
   }
@@ -27,7 +30,9 @@ async function create(input: { titulo: string; letra: string }): Promise<Musica>
   return musica
 }
 
-async function update(id: string, patch: { titulo: string; letra: string }) {
+// cifrada é explícito aqui (não redetectado por trás) — quem chama decide:
+// reimportação redeteca, edição manual preserva a correção do usuário.
+async function update(id: string, patch: { titulo: string; letra: string; cifrada: boolean }) {
   const existente = musicas.find((m) => m.id === id)
   if (!existente) return
   const atualizada: Musica = { ...existente, ...patch, atualizadoEm: Date.now() }

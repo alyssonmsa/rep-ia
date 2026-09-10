@@ -11,11 +11,12 @@
 
   let titulo = $state(existente?.titulo ?? '')
   let letra = $state(existente?.letra ?? '')
+  let cifrada = $state(existente?.cifrada ?? false)
 
   async function salvar() {
     const tituloLimpo = titulo.trim()
     if (!tituloLimpo) return
-    await musicasStore.update(musicaId, { titulo: tituloLimpo, letra })
+    await musicasStore.update(musicaId, { titulo: tituloLimpo, letra, cifrada })
     onDone()
   }
 
@@ -40,6 +41,11 @@
     <label class="form__label" for="letra">Letra</label>
     <textarea id="letra" class="form__textarea" bind:value={letra} placeholder="Cole ou digite a letra aqui"
     ></textarea>
+
+    <label class="form__toggle">
+      <input type="checkbox" bind:checked={cifrada} />
+      É uma cifra (acordes acima da letra)
+    </label>
 
     <button class="form__excluir" onclick={excluir}>Excluir música</button>
   </div>
@@ -126,6 +132,15 @@
     font-family: var(--fonte-letra);
     line-height: 1.5;
     white-space: pre-wrap;
+  }
+
+  .form__toggle {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--texto-fraco);
+    font-size: 14px;
   }
 
   .form__excluir {

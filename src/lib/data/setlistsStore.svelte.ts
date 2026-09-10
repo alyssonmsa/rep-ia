@@ -1,6 +1,7 @@
 import { getDb } from './db'
 import { duplicarItens, reordenarItens } from './setlistHelpers'
-import type { ItemSetlist, Setlist } from '../../types'
+import { casarItensPendentes, type Vinculo } from '../import/vinculacaoTardia'
+import type { ItemSetlist, Musica, Setlist } from '../../types'
 
 let setlists = $state<Setlist[]>([])
 let loaded = false
@@ -80,6 +81,29 @@ async function unlinkMusica(musicaId: string) {
   }
 }
 
+async function vincularItens(setlistId: string, vinculos: Vinculo[]) {
+  if (vinculos.length === 0) return
+  const setlist = setlists.find((s) => s.id === setlistId)
+  if (!setlist) return
+  const musicaIdPorItem = new Map(vinculos.map((v) => [v.itemId, v.musicaId]))
+  const itens = setlist.itens.map((item) =>
+    musicaIdPorItem.has(item.id) ? { ...item, musicaId: musicaIdPorItem.get(item.id)! } : item,
+  )
+  await persist({ ...setlist, itens, atualizadoEm: Date.now() })
+}
+
+/** Vinculação tardia (prompt.md §8.4): roda depois de qualquer importação, em todas as setlists. */
+async function tentarVincularTodas(musicas: Musica[]): Promise<number> {
+  let total = 0
+  for (const setlist of setlists) {
+    const vinculos = casarItensPendentes(setlist.itens, musicas)
+    if (vinculos.length === 0) continue
+    await vincularItens(setlist.id, vinculos)
+    total += vinculos.length
+  }
+  return total
+}
+
 export const setlistsStore = {
   get list() {
     return setlists
@@ -92,4 +116,6 @@ export const setlistsStore = {
   removeItem,
   reorderItems,
   unlinkMusica,
+  vincularItens,
+  tentarVincularTodas,
 }

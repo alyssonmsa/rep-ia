@@ -1,8 +1,10 @@
 <script lang="ts">
+  import { onMount, untrack } from 'svelte'
   import { dndzone, type DndEvent } from 'svelte-dnd-action'
   import { musicasStore } from '../data/musicasStore.svelte'
   import { setlistsStore } from '../data/setlistsStore.svelte'
   import { normalizarBusca } from '../data/normalize'
+  import { casarItensPendentes } from '../import/vinculacaoTardia'
   import type { ItemSetlist } from '../../types'
 
   let {
@@ -16,6 +18,17 @@
   let itensOrdenados = $state<ItemSetlist[]>([])
   $effect(() => {
     itensOrdenados = setlist ? [...setlist.itens].sort((a, b) => a.ordem - b.ordem) : []
+  })
+
+  // Vinculação tardia (prompt.md §8.4): ao abrir a setlist, tenta casar
+  // itens sem vínculo por título normalizado. Só uma vez, na abertura.
+  onMount(() => {
+    untrack(() => {
+      const atual = setlistsStore.list.find((s) => s.id === setlistId)
+      if (!atual) return
+      const vinculos = casarItensPendentes(atual.itens, musicasStore.list)
+      if (vinculos.length > 0) void setlistsStore.vincularItens(setlistId, vinculos)
+    })
   })
 
   let editandoNome = $state(false)

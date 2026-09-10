@@ -103,6 +103,27 @@ escrever(
   ].join('\n'),
 )
 
+// 5b. falso-positivo-cifra.txt — versos de uma palavra só que são acordes
+// válidos em inglês (A, E, Em) mas aqui são só letra normal, sem alinhamento
+// de cifra. Detecção tem que dar false (prompt.md §7).
+escrever(
+  'falso-positivo-cifra.txt',
+  [
+    'FALSO POSITIVO DE CIFRA',
+    '',
+    'Ninguém sabe o que vai acontecer',
+    'E',
+    'Ninguém segura o tempo',
+    'A',
+    'Vida segue sempre em frente',
+    '',
+    'Em',
+    'todo canto dessa cidade',
+    'eu te procurei',
+    '/END',
+  ].join('\n'),
+)
+
 // 6. baguncado.txt — BOM, CRLF, nbsp escondido numa linha "vazia", /end
 // minúsculo, /FIM, dois terminadores seguidos (bloco vazio) e espaços
 // sobrando nas pontas das linhas terminadoras.
