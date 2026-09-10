@@ -1,0 +1,9 @@
+PRIMEIRA MÚSICA
+
+Linha única da primeira música
+/END
+
+ÚLTIMA MÚSICA
+
+Essa aqui não tem terminador
+Fecha só porque o arquivo acabou

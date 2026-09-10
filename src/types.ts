@@ -22,3 +22,9 @@ export type Setlist = {
   criadoEm: number
   atualizadoEm: number
 }
+
+export type LotesImportacao = {
+  id: string
+  musicaIds: string[]
+  importadoEm: number
+}

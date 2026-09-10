@@ -1,0 +1,16 @@
+﻿primeira música
+
+letra da primeira
+/end
+
+segunda música
+ 
+letra da segunda
+/FIM
+
+  /END  
+
+terceira música
+
+letra da terceira
+/END

@@ -2,10 +2,20 @@
   import { musicasStore } from '../data/musicasStore.svelte'
   import { normalizarBusca } from '../data/normalize'
 
-  let { onOpenMusica, onNovaMusica }: { onOpenMusica: (id: string) => void; onNovaMusica: () => void } =
-    $props()
+  let {
+    onOpenMusica,
+    onColarLetra,
+    onArquivoTexto,
+    onExportar,
+  }: {
+    onOpenMusica: (id: string) => void
+    onColarLetra: () => void
+    onArquivoTexto: (texto: string) => void
+    onExportar: () => void
+  } = $props()
 
   let busca = $state('')
+  let inputArquivo: HTMLInputElement | undefined = $state()
 
   const musicasFiltradas = $derived.by(() => {
     const termo = normalizarBusca(busca)
@@ -14,6 +24,15 @@
       : musicasStore.list
     return [...lista].sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR', { sensitivity: 'base' }))
   })
+
+  async function handleArquivoSelecionado(event: Event) {
+    const input = event.currentTarget as HTMLInputElement
+    const arquivo = input.files?.[0]
+    input.value = ''
+    if (!arquivo) return
+    const texto = await arquivo.text()
+    onArquivoTexto(texto)
+  }
 </script>
 
 <div class="acervo">
@@ -25,13 +44,26 @@
       bind:value={busca}
       aria-label="Buscar música"
     />
-    <button class="acervo__nova" onclick={onNovaMusica}>+ Nova música</button>
+    <div class="acervo__acoes">
+      <button class="acervo__acao" onclick={onColarLetra}>Colar letra</button>
+      <button class="acervo__acao" onclick={() => inputArquivo?.click()}>Importar arquivo</button>
+      {#if musicasStore.list.length > 0}
+        <button class="acervo__acao" onclick={onExportar}>Exportar</button>
+      {/if}
+    </div>
+    <input
+      bind:this={inputArquivo}
+      type="file"
+      accept=".txt,text/plain"
+      class="acervo__input-arquivo"
+      onchange={handleArquivoSelecionado}
+    />
   </div>
 
   {#if musicasStore.list.length === 0}
     <div class="acervo__vazio">
       <p>Você ainda não tem nenhuma música no acervo.</p>
-      <button class="acervo__nova" onclick={onNovaMusica}>Colar a primeira letra</button>
+      <button class="acervo__acao" onclick={onColarLetra}>Colar a primeira letra</button>
     </div>
   {:else if musicasFiltradas.length === 0}
     <p class="acervo__sem-resultado">Nenhuma música encontrada pra "{busca}".</p>
@@ -59,12 +91,12 @@
 
   .acervo__header {
     display: flex;
+    flex-direction: column;
     gap: 8px;
     flex: 0 0 auto;
   }
 
   .acervo__busca {
-    flex: 1;
     min-height: 44px;
     padding: 0 12px;
     border-radius: 8px;
@@ -74,7 +106,13 @@
     font-size: 16px;
   }
 
-  .acervo__nova {
+  .acervo__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .acervo__acao {
     min-height: 44px;
     padding: 0 14px;
     border-radius: 8px;
@@ -85,8 +123,12 @@
     white-space: nowrap;
   }
 
-  .acervo__nova:active {
+  .acervo__acao:active {
     background: var(--superficie-alta);
+  }
+
+  .acervo__input-arquivo {
+    display: none;
   }
 
   .acervo__vazio {

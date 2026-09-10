@@ -3,11 +3,11 @@
   import { musicasStore } from '../data/musicasStore.svelte'
   import { setlistsStore } from '../data/setlistsStore.svelte'
 
-  let { musicaId, onDone }: { musicaId: string | null; onDone: () => void } = $props()
+  let { musicaId, onDone }: { musicaId: string; onDone: () => void } = $props()
 
   // Seed único no mount — o formulário não deve se resincronizar se a
   // música mudar em outro lugar enquanto o usuário está editando.
-  const existente = untrack(() => (musicaId ? musicasStore.list.find((m) => m.id === musicaId) : null))
+  const existente = untrack(() => musicasStore.list.find((m) => m.id === musicaId))
 
   let titulo = $state(existente?.titulo ?? '')
   let letra = $state(existente?.letra ?? '')
@@ -15,16 +15,11 @@
   async function salvar() {
     const tituloLimpo = titulo.trim()
     if (!tituloLimpo) return
-    if (musicaId) {
-      await musicasStore.update(musicaId, { titulo: tituloLimpo, letra })
-    } else {
-      await musicasStore.create({ titulo: tituloLimpo, letra })
-    }
+    await musicasStore.update(musicaId, { titulo: tituloLimpo, letra })
     onDone()
   }
 
   async function excluir() {
-    if (!musicaId) return
     await setlistsStore.unlinkMusica(musicaId)
     await musicasStore.remove(musicaId)
     onDone()
@@ -34,7 +29,7 @@
 <div class="form">
   <div class="form__topbar">
     <button class="form__voltar" onclick={onDone}>‹ Cancelar</button>
-    <span class="form__titulo">{musicaId ? 'Editar música' : 'Nova música'}</span>
+    <span class="form__titulo">Editar música</span>
     <button class="form__salvar" onclick={salvar} disabled={!titulo.trim()}>Salvar</button>
   </div>
 
@@ -46,9 +41,7 @@
     <textarea id="letra" class="form__textarea" bind:value={letra} placeholder="Cole ou digite a letra aqui"
     ></textarea>
 
-    {#if musicaId}
-      <button class="form__excluir" onclick={excluir}>Excluir música</button>
-    {/if}
+    <button class="form__excluir" onclick={excluir}>Excluir música</button>
   </div>
 </div>
 
