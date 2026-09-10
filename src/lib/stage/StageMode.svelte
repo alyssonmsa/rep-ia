@@ -2,26 +2,41 @@
   import { onDestroy, onMount } from 'svelte'
   import QueueView from './QueueView.svelte'
   import LyricsView from './LyricsView.svelte'
-  import { musicasFixture } from '../fixtures/songs'
+  import { musicasStore } from '../data/musicasStore.svelte'
+  import { setlistsStore } from '../data/setlistsStore.svelte'
   import { createWakeLockController } from '../wakelock'
+  import type { Musica } from '../../types'
+
+  let { setlistId, onExit }: { setlistId: string; onExit: () => void } = $props()
+
+  const setlist = $derived(setlistsStore.list.find((s) => s.id === setlistId))
+  const itens = $derived(setlist ? [...setlist.itens].sort((a, b) => a.ordem - b.ordem) : [])
+
+  function resolveMusica(musicaId: string): Musica | undefined {
+    return musicasStore.list.find((m) => m.id === musicaId)
+  }
 
   let view = $state<'fila' | 'letra'>('fila')
-  let selectedId = $state<string | null>(null)
+  let currentItemId = $state<string | null>(null)
+  let musicaAberta = $state<Musica | null>(null)
 
-  const musicaSelecionada = $derived(musicasFixture.find((m) => m.id === selectedId) ?? null)
-
-  const wakeLock = createWakeLockController()
-  let engagedOnce = false
-
-  function openMusica(id: string) {
-    selectedId = id
+  function selecionarItem(itemId: string) {
+    currentItemId = itemId
+    const item = itens.find((i) => i.id === itemId)
+    if (!item || item.tipo !== 'musica' || !item.musicaId) return
+    const musica = resolveMusica(item.musicaId)
+    if (!musica) return
+    musicaAberta = musica
     view = 'letra'
   }
 
-  function backToQueue() {
+  function voltarParaFila() {
     view = 'fila'
-    selectedId = null
+    musicaAberta = null
   }
+
+  const wakeLock = createWakeLockController()
+  let engagedOnce = false
 
   // Tela cheia e Wake Lock exigem um gesto do usuário — dispara os dois na
   // primeira interação, sem adicionar um botão "iniciar" separado
@@ -59,9 +74,9 @@
 
   <div class="stage__body">
     {#if view === 'fila'}
-      <QueueView musicas={musicasFixture} onSelect={openMusica} />
-    {:else if musicaSelecionada}
-      <LyricsView musica={musicaSelecionada} onBack={backToQueue} />
+      <QueueView {itens} {currentItemId} {resolveMusica} onSelect={selecionarItem} {onExit} />
+    {:else if musicaAberta}
+      <LyricsView musica={musicaAberta} onBack={voltarParaFila} />
     {/if}
   </div>
 </div>
