@@ -111,12 +111,10 @@ body.lendo .palco{display:grid;grid-template-columns:1.35fr repeat(4,1fr)}
 .fab-tema{left:1rem;background:var(--painel);color:var(--papel);border:1px solid var(--linha);
   font-size:1.25rem}
 .fab-ordenar:active,.fab-tema:active{transform:scale(.94)}
-body.lendo .fab-ordenar{display:none}
-body.lendo .fab-tema{bottom:calc(var(--barra) + env(safe-area-inset-bottom) + 12px)}
+body.lendo .fab-ordenar,body.lendo .fab-tema{display:none}
 
 @media(min-width:720px){ .nome{font-size:1.02rem} .letra h3{font-size:1.5rem}
-  .fab-ordenar{right:1.4rem;bottom:1.4rem} .fab-tema{left:1.4rem;bottom:1.4rem}
-  body.lendo .fab-tema{bottom:calc(var(--barra) + env(safe-area-inset-bottom) + 12px)} }
+  .fab-ordenar{right:1.4rem;bottom:1.4rem} .fab-tema{left:1.4rem;bottom:1.4rem} }
 </style></head><body>
 
 <div class="topo">
