@@ -89,8 +89,10 @@ body.condensado .corpo p.esp{display:none}
 .palco{position:fixed;left:0;right:0;bottom:0;z-index:20;display:none;
   padding-bottom:env(safe-area-inset-bottom);
   background:var(--palco-fundo);border-top:1px solid var(--linha);
-  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  transition:transform .2s ease}
 body.lendo .palco{display:grid;grid-template-columns:1.35fr repeat(4,1fr)}
+body.controles-ocultos .palco{transform:translateY(100%)}
 .palco button{background:none;border:0;color:var(--papel);font-family:inherit;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   height:var(--barra);padding:0;border-left:1px solid var(--overlay-linha)}
@@ -410,6 +412,9 @@ function condensar(on){
   bEsp.setAttribute('aria-pressed', on ? 'false' : 'true');
 }
 
+function mostrarControles() { document.body.classList.remove('controles-ocultos'); }
+function alternarControles() { document.body.classList.toggle('controles-ocultos'); }
+
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 let posIndice = 0, atual = null;
 function abrir(n){
@@ -418,6 +423,7 @@ function abrir(n){
   document.querySelectorAll('.letra').forEach(a => a.classList.remove('ativa'));
   document.getElementById('m' + n).classList.add('ativa');
   document.body.classList.add('lendo');
+  mostrarControles();
   atual = n;
   const g = ajustePorMusica[n];
   if (g) { setTam(g.t); condensar(g.c); } else { setTam(tam); }
@@ -435,7 +441,10 @@ function fechar(){
 }
 document.addEventListener('click', ev => {
   const ir = ev.target.closest('[data-go]');
-  if (ir) abrir(ir.dataset.go);
+  if (ir) { abrir(ir.dataset.go); return; }
+  if (document.body.classList.contains('lendo') && !ev.target.closest('.palco')) {
+    alternarControles();
+  }
 });
 document.getElementById('bVoltar').addEventListener('click', () => {
   if (location.hash) history.back(); else fechar();
@@ -444,6 +453,9 @@ window.addEventListener('popstate', () => {
   const m = location.hash.match(/^#m(\d+)$/);
   if (m) abrir(m[1]); else fechar();
 });
+window.addEventListener('scroll', () => {
+  if (document.body.classList.contains('lendo')) mostrarControles();
+}, { passive: true });
 
 document.getElementById('bMaior').addEventListener('click', () => { setTam(tam + 0.1); guardar(); });
 document.getElementById('bMenor').addEventListener('click', () => { setTam(tam - 0.1); guardar(); });
